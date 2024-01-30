@@ -1,9 +1,13 @@
 "use client";
 
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import { User } from "@supabase/supabase-js";
 import { Button } from "./ui/button";
+import { useRouter } from "next/navigation";
 
-const Header = () => {
+const Header = ({ userData }: { userData: User | undefined }) => {
+	const router = useRouter();
+
 	const handleLogin = () => {
 		supabaseBrowser.auth.signInWithOAuth({
 			provider: "github",
@@ -11,6 +15,11 @@ const Header = () => {
 				redirectTo: location.origin + "auth/callback"
 			}
 		});
+	}
+
+	const handleLogout = async() => {
+		await supabaseBrowser.auth.signOut();
+		router.refresh();
 	}
 
 	return (
@@ -22,7 +31,13 @@ const Header = () => {
 					<p>2 online users</p>
 				</div>
 			</div>
-			<Button className="text-white" onClick={handleLogin}>Logout</Button>
+			{
+				userData 
+				?
+				<Button className="text-white" onClick={handleLogout}>Logout</Button>
+				:
+				<Button className="text-white" onClick={handleLogin}>Login</Button>
+			}
 		</div>
 	);
 }
